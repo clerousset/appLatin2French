@@ -5,13 +5,9 @@ library(shiny)
 library(dqshiny)
 library(data.table)
 
-dico <- aws.s3::s3readRDS("dico.Rds", bucket="clementrousset",region = "")
+dico <-readRDS("dico.Rds")
 entries_for_search<-lapply(dico, function(x)x$entry_for_search)
 entries<-lapply(dico, function(x)x$entry)
-aws.s3::save_object(
-  object = "rules2.csv",
-  bucket = "clementrousset",
-  region = "")
 rules<-data.table::fread("rules2.csv")
 latin_to_french <- function(word, rules = rules2){
   word <- tolower(word)
