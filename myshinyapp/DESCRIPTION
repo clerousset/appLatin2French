@@ -17,6 +17,7 @@ Imports:
     shiny, 
     data.table,
     dqshiny,
-    shinyThings	
+    shinyThings,
+    rhandsontable
 	
 
