@@ -15,9 +15,6 @@ Imports:
     RPostgres, 
     glue,
     shiny, 
-    data.table,
-    dqshiny,
-    shinyThings,
-    rhandsontable
+    data.table
 	
 
