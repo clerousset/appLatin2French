@@ -33,9 +33,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: |
-            ${{ steps.docker_meta.outputs.tags }}
-            ${{ github.ref == 'refs/heads/main' && 'inseefrlab/shiny-app-template:latest' || '' }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
