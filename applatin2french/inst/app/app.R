@@ -24,6 +24,50 @@ latin_to_french <- function(word, rules = rules2){
   }
   ans
 }
+latin_to_french2 <- function(word, rules = rules2){
+  word <- tolower(word)
+  dt_ans <- data.table()
+  ans <-  paste0("Starting from ", word)
+  for(i in seq_len(dim(rules)[1])){
+    if(grepl(rules[i,"Pattern"], word,perl=TRUE)){
+      word <- gsub(rules[i,"Pattern"],rules[i,"Replacement"], word,perl=TRUE)
+      dt_ans <- rbind(
+        dt_ans,
+        data.table(rule_id = i, date = rules[i]$Date, explanation = rules[i]$Explanation, word = word)
+      )
+  }}
+  dt_ans
+}
+pretty_print(dt){
+  dt[, period:=fcase(
+    is.infinite(date), "Preliminaries",
+    date < 500, "Common Romance Transformation",
+    default = "French transformations"
+    )]
+  kable(dt[,.(date = fifelse(is.infinite(date), "", paste(date, "AD")) , explanation, word, rule_id)]) %>%
+    
+    pack_rows(
+      group_label = "Preliminaries",
+      start_row = min(which(dt$period == "Preliminaries")),
+      end_row = max(which(dt$period == "Preliminaries")),
+      background = "violet") %>%
+    row_spec(row = which(dt$period == "Preliminaries"), background = "violet") %>%
+    pack_rows(
+      group_label = "Common Romance Transformation",
+      start_row = min(which(dt$period == "Common Romance Transformation")),
+      end_row = max(which(dt$period == "Common Romance Transformation")),
+      background = "orange") %>%
+    row_spec(row = which(dt$period == "Common Romance Transformation"), background = "orange") %>%
+    pack_rows(
+      group_label = "French transformations",
+      start_row = min(which(dt$period == "French transformations")),
+      end_row = max(which(dt$period == "French transformations")),
+      background = "skyblue") %>%
+    row_spec(row = which(dt$period == "French transformations"), background = "skyblue") %>%
+    
+    kableExtra::kable_styling()
+  }
+
 
 shinyApp(
   ui =
