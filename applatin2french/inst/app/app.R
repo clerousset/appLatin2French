@@ -1,6 +1,8 @@
 devtools::install_github("gadenbuie/shinyThings")
 remotes::install_github("daqana/dqshiny")
 install.packages("rhandsontable")
+install.packages(kableExtra)
+library(kableExtra)
 library(shiny)
 library(dqshiny)
 library(data.table)
