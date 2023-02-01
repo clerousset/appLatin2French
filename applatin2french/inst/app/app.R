@@ -7,6 +7,41 @@ library(shiny)
 library(dqshiny)
 library(data.table)
 
+list_example <- data.table(latin = c(
+  "b\u0115\u0301ll\u014ds",#ok
+  "b\u0115\u0301n\u0115",
+  "b\u014f\u0301v\u0115",
+  "c\u0101\u0301m\u0115ra",
+  "cant\u0101\u0301t\u016D",
+  "c\u0101\u0301p\u016D",
+  "c\u0101\u0301r\u016D",
+  "c\u014f\u0301m\u012dte",
+  "c\u014f\u0301mp\u016Dtat",
+  "fa\u0301ct\u016D",
+  "f\u012d\u0301de",
+  "f\u012b\u0301l\u012d\u016Ds",
+  "f\u014f\u0301l\u012d\u0103",
+  "h\u014f\u0301sp\u012dte",
+  "l\u0115\u0301ct\u016D",
+  "ma\u0301los",
+  "ma\u0301los",
+  "mat\u016B\u0301r\u016D",
+  "merc\u0113\u0301de",
+  "nau\u0301s\u0115a",
+  "n\u0115p\u014d\u0301te",
+  "n\u016B\u0301d\u016D",
+  "p\u0115\u0301de",
+  "pla\u0301n\u016D",
+  "p\u014f\u0301tet",
+  "pr\u0103\u0301t\u016D",
+  "pr\u0103t\u016D",
+  "p\u016D\u0301gn\u016D",#ok
+  "t\u0113\u0301ct\u016D",#ok
+  "t\u0115\u0301n\u0115r\u016D",#ok
+  "v\u012b\u0301ta",
+  "v\u012d\u0301nc\u0115re"),
+  french = c("chambre [chabr]"))
+
 dico <-readRDS("dico.Rds")
 entries_for_search<-lapply(dico, function(x)x$entry_for_search)
 entries<-lapply(dico, function(x)x$entry)
@@ -64,26 +99,35 @@ pretty_print <- function(dt){
   
   dt2[,note:=
         fifelse(century %chin% c("9th century AD","10th century AD"), "orthograph fixation", "")]
-  kable(dt2, format.args=list(na.encode=TRUE)) %>%
-    pack_rows(
+  dt2 <- dt2[!(century=="Preliminaries" & explanation=="")]
+  index_prelim <- which(dt$period == "Preliminaries")
+  index_common <- which(dt$period == "Common Romance Transformation")
+  index_french <- which(dt$period == "French transformations")
+  res <- kable(dt2, format.args=list(na.encode=TRUE)) 
+  if(length(index_prelim)>0){
+    res <- res %>% pack_rows(
       group_label = "Preliminaries",
-      start_row = min(which(dt$period == "Preliminaries")),
-      end_row = max(which(dt$period == "Preliminaries")),
+      start_row = min(index_prelim),
+      end_row = max(index_prelim),
       background = "violet") %>%
-    row_spec(row = which(dt$period == "Preliminaries"), background = "violet") %>%
+    row_spec(row = index_prelim, background = "violet")}
+  if(length(index_common)>0){
+    res <- res %>% 
     pack_rows(
       group_label = "Common Romance Transformation",
-      start_row = min(which(dt$period == "Common Romance Transformation")),
-      end_row = max(which(dt$period == "Common Romance Transformation")),
+      start_row = min(index_common),
+      end_row = max(index_common),
       background = "orange") %>%
-    row_spec(row = which(dt$period == "Common Romance Transformation"), background = "orange") %>%
-    pack_rows(
+    row_spec(row = index_common, background = "orange")}
+  if(length(index_french)>0){
+    res <- res %>% pack_rows(
       group_label = "French transformations",
-      start_row = min(which(dt$period == "French transformations")),
-      end_row = max(which(dt$period == "French transformations")),
+      start_row = min(index_french),
+      end_row = max(index_french),
       background = "skyblue") %>%
-    column_spec(which(names(dt2)=="note"), bold = TRUE) %>%
-    row_spec(row = which(dt$period == "French transformations"), background = "skyblue") %>%
+    row_spec(row = index_french, background = "skyblue")}
+     
+    res %>% column_spec(which(names(dt2)=="note"), bold = TRUE) %>%
     kable_styling()
 
   
@@ -113,7 +157,7 @@ shinyApp(
               )
             ),
           fluidRow(
-            htmlOutput("selection")
+            htmlOutput("selection"), htmlOutput("example_explained")
           ),
           fluidRow(
             htmlOutput("meaning")
@@ -145,41 +189,7 @@ shinyApp(
               inputId = "examples",
               label = "Examples",
               selected = "c\u0101\u0301m\u0115ra",
-              choices = c(
-                          "b\u0115\u0301ll\u014ds",#ok
-                          "b\u0115\u0301n\u0115",
-                          "b\u014f\u0301v\u0115",
-                          "c\u0101\u0301m\u0115ra",
-                          "cant\u0101\u0301t\u016D",
-                          "c\u0101\u0301p\u016D",
-                          "c\u0101\u0301r\u016D",
-                          "c\u014f\u0301m\u012dte",
-                          "c\u014f\u0301mp\u016Dtat",
-                          "fa\u0301ct\u016D",
-                          "f\u012d\u0301de",
-                          "f\u012b\u0301l\u012d\u016Ds",
-                          "f\u014f\u0301l\u012d\u0103",
-                          "h\u014f\u0301sp\u012dte",
-                          "l\u0115\u0301ct\u016D",
-                          "ma\u0301los",
-                          "ma\u0301los",
-                          "mat\u016B\u0301r\u016D",
-                          "merc\u0113\u0301de",
-                          "nau\u0301s\u0115a",
-                          "n\u0115p\u014d\u0301te",
-                          "n\u016B\u0301d\u016D",
-                          "p\u0115\u0301de",
-                          "pla\u0301n\u016D",
-                          "p\u014f\u0301tet",
-                          "pr\u0103\u0301t\u016D",
-                          "pr\u0103t\u016D",
-                          "p\u016D\u0301gn\u016D",#ok
-                          "t\u0113\u0301ct\u016D",#ok
-                          "t\u0115\u0301n\u0115r\u016D",#ok
-                          "v\u012b\u0301ta",
-                          "v\u012d\u0301nc\u0115re")
-
-            )
+              choices = list_example$latin)
           )
         } else {
             column(
@@ -194,6 +204,12 @@ shinyApp(
 
         }
       })
+    output$example_explained <- renderUI({
+      req(input$choice)
+      if(input$choice == "Examples"){
+    column(6, h3("Latin word ", strong(input$examples), "becomes French word", 
+    strong(list_example[latin == input$examples]$french)))}
+      else {NULL}})
     output$meaning <-
       renderUI({
         req(input$choice)
