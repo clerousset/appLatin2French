@@ -2,6 +2,7 @@ library("data.table")
 install.packages("kableExtra")
 library("kableExtra")
 dt <- latin_to_french2("c\u0101\u0301m\u0115ra", rules=rules)
+pretty_print(dt)
 dt[, century:=fcase(
   is.infinite(date), "Preliminaries",
   date < 100, "1st century AD",
@@ -20,10 +21,12 @@ dt[,period:=fcase(
   "Common Romance Transformation",
   default = "French transformations")]
 
-dt[,orthograph_fixation:=
-  century %chin% c("9th century AD","10th century AD")]
+dt2 <- dt[,.(century, explanation, word, rule_id=as.character(rule_id))][,n:=seq_len(.N),century][n!=1, century:=""][,n:=NULL]
+dt2[is.na(explanation), explanation:=""][is.na(word), word:=""][is.na(rule_id),rule_id:=""]
 
-kable(dt[,.(century, explanation, word, rule_id)], format.args=list(na.encode=TRUE)) %>%
+dt2[,note:=
+      fifelse(century %chin% c("9th century AD","10th century AD"), "orthograph fixation", "")]
+kable(dt2, format.args=list(na.encode=TRUE)) %>%
   pack_rows(
     group_label = "Preliminaries",
     start_row = min(which(dt$period == "Preliminaries")),
@@ -41,9 +44,7 @@ kable(dt[,.(century, explanation, word, rule_id)], format.args=list(na.encode=TR
     start_row = min(which(dt$period == "French transformations")),
     end_row = max(which(dt$period == "French transformations")),
     background = "skyblue") %>%
+  column_spec(which(names(dt2)=="note"), bold = TRUE) %>%
   row_spec(row = which(dt$period == "French transformations"), background = "skyblue") %>%
-  
   kableExtra::kable_styling()
-________________________________________
-Nos ministères agissent pour un développement durable.
-Préservons l'environnement : n'imprimons que si nécessaire !
+
