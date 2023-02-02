@@ -40,7 +40,16 @@ list_example <- data.table(latin = c(
   "t\u0115\u0301n\u0115r\u016D",#ok
   "v\u012b\u0301ta",
   "v\u012d\u0301nc\u0115re"),
-  french = c("chambre [chabr]"))
+  french = c(
+    "beau [bo] (en : beautiful)",
+    "bien [bjɛ\u0303] (en : good)",
+    "boeuf [b\u00f8] (en : ox)",
+    "chambre [\u0283a\u0303b\u0280] (en : room)",
+    "chanté [\u0283a\u0303te] (en : sung)",
+    "chef [\u0283\u025bf] (en : chief)",
+    "cher [\u0283\u025b\u0280] (en : expensive)",
+    "compte [] (en :  "
+    ))
 
 dico <-readRDS("dico.Rds")
 entries_for_search<-lapply(dico, function(x)x$entry_for_search)
