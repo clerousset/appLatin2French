@@ -17,6 +17,11 @@ Imports:
     shiny, 
     data.table,
     devtools,
-    remotes
-	
-
+    remotes,
+    shinyThings,
+    dqshiny,
+    rhandsontable,
+    kableExtra
+Remotes:
+    gadenbuie/shinyThings,
+    daqana/dqshiny
