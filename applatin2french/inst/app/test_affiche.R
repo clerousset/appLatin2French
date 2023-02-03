@@ -1,7 +1,7 @@
 library("data.table")
 install.packages("kableExtra")
 library("kableExtra")
-dt <- latin_to_french2("c\u0101\u0301m\u0115ra", rules=rules)
+dt <- latin_to_french2("b\u0115\u0301n\u0115", rules=rules)
 pretty_print(dt)
 dt[, century:=fcase(
   is.infinite(date), "Preliminaries",
