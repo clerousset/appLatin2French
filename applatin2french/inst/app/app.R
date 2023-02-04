@@ -93,14 +93,17 @@ latin_to_french <- function(word, rules = rules2){
 latin_to_french2 <- function(word, rules = rules, exceptions = character(0)){
   word <- tolower(word)
   dt_ans <- data.table()
-  ans <-  paste0("Starting from ", word)
+  #ans <-  paste0("Starting from ", word)
   rules <- rules[!rule_id %in% exceptions]
   for(i in seq_len(dim(rules)[1])){
-    if(grepl(rules[i,"Pattern"], word,perl=TRUE)){
-      word <- gsub(rules[i,"Pattern"],rules[i,"Replacement"], word,perl=TRUE)
+    if(grepl(rules[i,"Pattern"], word, perl = TRUE)){
+      word_to_print <- gsub(rules[i,"Pattern"],paste0("<strong>",rules[i,"Replacement"],"</strong>"), word,perl=TRUE)
+      word <- gsub("</strong>","",gsub("<strong>","",word_to_print))
       dt_ans <- rbind(
         dt_ans,
-        data.table(rule_id = rules[i]$rule_id, date = rules[i]$Date, explanation = rules[i]$Explanation, word = word)
+        data.table(rule_id = rules[i]$rule_id, date = rules[i]$Date,
+                   explanation = rules[i]$Explanation, word = word,
+                   word_to_print = word_to_print)
       )
   }}
   dt_ans
@@ -124,8 +127,8 @@ pretty_print <- function(dt){
     "Common Romance Transformation",
     default = "French transformations")]
   
-  dt2 <- dt[,.(period, century, explanation, word, rule_id=as.character(rule_id))][,n:=seq_len(.N),century][n!=1, century:=""][,n:=NULL]
-  dt2[is.na(explanation), explanation:=""][is.na(word), word:=""][is.na(rule_id),rule_id:=""]
+  dt2 <- dt[,.(period, century, explanation, word_to_print, rule_id=as.character(rule_id))][,n:=seq_len(.N),century][n!=1, century:=""][,n:=NULL]
+  dt2[is.na(explanation), explanation:=""][is.na(word_to_print), word_to_print:=""][is.na(rule_id),rule_id:=""]
   dt2[century == "Preliminaries", century:=""]
   dt2[,note:=
         fifelse(century %chin% c("9th century AD","10th century AD"), "orthograph fixation", "")]
@@ -133,22 +136,22 @@ pretty_print <- function(dt){
   index_prelim <- which(dt2$period == "Preliminaries")
   index_common <- which(dt2$period == "Common Romance Transformation")
   index_french <- which(dt2$period == "French transformations")
-  res <- kable(dt2[,!"period"], format.args=list(na.encode=TRUE)) 
+  res <- kable(dt2[,!"period"], format.args=list(na.encode=TRUE), escape = FALSE) 
   if(length(index_prelim)>0){
     res <- res %>% pack_rows(
       group_label = "Preliminaries",
       start_row = min(index_prelim),
       end_row = max(index_prelim),
-      background = "violet") %>%
-    row_spec(row = index_prelim, background = "violet")}
+      background = "plum") %>%
+    row_spec(row = index_prelim, background = "plum")}
   if(length(index_common)>0){
     res <- res %>% 
     pack_rows(
       group_label = "Common Romance Transformation",
       start_row = min(index_common),
       end_row = max(index_common),
-      background = "orange") %>%
-    row_spec(row = index_common, background = "orange")}
+      background = "lightsalmon") %>%
+    row_spec(row = index_common, background = "lightsalmon")}
   if(length(index_french)>0){
     res <- res %>% pack_rows(
       group_label = "French transformations",
@@ -158,6 +161,7 @@ pretty_print <- function(dt){
     row_spec(row = index_french, background = "skyblue")}
      
     res %>% column_spec(which(names(dt2)=="note")-1, bold = TRUE) %>%
+      # cell_spec(c(3,2), format= "html")%>%
     kable_styling()
 
   
@@ -246,9 +250,11 @@ shinyApp(
     output$example_explained <- renderUI({
       req(input$choice)
       if(input$choice == "Examples"){
+        req(input$examples)
     column(6, h3("Latin word ", strong(input$examples), "becomes French word", 
     strong(list_example[latin == input$examples]$french)))}
       else {
+        req(input$auto2)
         column(6,
                h3(
                  "Natural transformation of Latin word ",
@@ -261,7 +267,7 @@ shinyApp(
         if(input$choice != "Examples"){
           req(input$auto2)
         fluidRow(
-          column(10,
+          column(9,
                  tags$label("Meaning:"),
                  tags$head(
                    tags$style(
@@ -278,6 +284,7 @@ shinyApp(
     output$transfo <- function() {
       req(input$choice)
       if(input$choice == "Examples"){
+        req(input$examples)
         pretty_print(
           latin_to_french2(
             input$examples,
@@ -286,6 +293,7 @@ shinyApp(
             )
         )
       } else {
+        req(input$auto2)
         pretty_print(
           latin_to_french2(
             input$auto2,
