@@ -6,6 +6,25 @@ library(kableExtra)
 library(shiny)
 library(dqshiny)
 library(data.table)
+ipa2kirsh <-
+  data.table(
+    ipa = c("\u025b","\u0254","\u02C8","\u0259","\u0303","\u03b2","\u03b3",
+            "\u03b4","\u03b8","\u0292","\u0283","\u00f8","\u0153","\u0265",
+            "\u026b","\u02b7","\u0280","\u00e7","\u014b"),
+    kirshenbaum = c("E","O","'","@","~","B","Q","D","T","Z","S","Y","W","j<rnd>",
+                    "L","<w>","R","C","N")
+  )
+paste(
+  ipa2kirsh[
+    as.data.table(
+      strsplit(
+        "\u0280a\u0292o",
+        split="")
+    ),
+    on=.(ipa=V1)][
+      is.na(kirshenbaum),
+      kirshenbaum:=ipa]$kirshenbaum,
+  collapse = "")
 
 list_example <- 
   data.table(latin = c(
@@ -90,7 +109,7 @@ latin_to_french <- function(word, rules = rules2){
   }
   ans
 }
-latin_to_french2 <- function(word, rules = rules, exceptions = character(0)){
+latin_to_french2 <- function(word, rules = rules, exceptions = character(0), ipa2kirsh_=ipa2kirsh){
   word <- tolower(word)
   dt_ans <- data.table()
   #ans <-  paste0("Starting from ", word)
@@ -99,14 +118,26 @@ latin_to_french2 <- function(word, rules = rules, exceptions = character(0)){
     if(grepl(rules[i,"Pattern"], word, perl = TRUE)){
       word_to_print <- gsub(rules[i,"Pattern"],paste0("<strong>",rules[i,"Replacement"],"</strong>"), word,perl=TRUE)
       word <- gsub("</strong>","",gsub("<strong>","",word_to_print))
+      kirsh = paste(
+        ipa2kirsh[
+          as.data.table(
+            strsplit(
+              word,
+              split="")
+          ),
+          on=.(ipa=V1)][
+            is.na(kirshenbaum),
+            kirshenbaum:=ipa]$kirshenbaum,
+        collapse = "")
       dt_ans <- rbind(
         dt_ans,
         data.table(rule_id = rules[i]$rule_id, date = rules[i]$Date,
                    explanation = rules[i]$Explanation, word = word,
-                   word_to_print = word_to_print)
+                   word_to_print = word_to_print, kirsh = kirsh)
       )
   }}
   dt_ans
+  
 }
 pretty_print <- function(dt){
   dt[, century:=fcase(
@@ -136,7 +167,15 @@ pretty_print <- function(dt){
   index_prelim <- which(dt2$period == "Preliminaries")
   index_common <- which(dt2$period == "Common Romance Transformation")
   index_french <- which(dt2$period == "French transformations")
-  res <- kable(dt2[,!"period"], format.args=list(na.encode=TRUE), escape = FALSE) 
+  dt2[c(max(index_prelim), index_common, index_french), sound:=
+  # "<button type='button'><img
+  # src='https://upload.wikimedia.org/wikipedia/commons/4/47/Sound-icon.svg'
+  # height='30'
+  # width='30' /></button>"
+    as.character(shiny::actionButton("ee", "act"))
+  ]
+  dt2[is.na(sound), sound:=""]
+  res <- kbl(dt2[,!"period"], format.args=list(na.encode=TRUE), escape = FALSE) 
   if(length(index_prelim)>0){
     res <- res %>% pack_rows(
       group_label = "Preliminaries",
