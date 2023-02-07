@@ -14,17 +14,6 @@ ipa2kirsh <-
     kirshenbaum = c("E","O","'","@","~","B","Q","D","T","Z","S","Y","W","j<rnd>",
                     "L","<w>","R","C","N")
   )
-paste(
-  ipa2kirsh[
-    as.data.table(
-      strsplit(
-        "\u0280a\u0292o",
-        split="")
-    ),
-    on=.(ipa=V1)][
-      is.na(kirshenbaum),
-      kirshenbaum:=ipa]$kirshenbaum,
-  collapse = "")
 
 list_example <- 
   data.table(latin = c(
@@ -109,16 +98,16 @@ latin_to_french <- function(word, rules = rules2){
   }
   ans
 }
-latin_to_french2 <- function(word, rules = rules, exceptions = character(0), ipa2kirsh_=ipa2kirsh){
+latin_to_french2 <- function(word, rules_ = rules, exceptions = character(0), ipa2kirsh_=ipa2kirsh){
   word <- tolower(word)
   dt_ans <- data.table()
   #ans <-  paste0("Starting from ", word)
-  rules <- rules[!rule_id %in% exceptions]
-  for(i in seq_len(dim(rules)[1])){
-    if(grepl(rules[i,"Pattern"], word, perl = TRUE)){
-      word_to_print <- gsub(rules[i,"Pattern"],paste0("<strong>",rules[i,"Replacement"],"</strong>"), word,perl=TRUE)
+  rules_ <- rules_[!rule_id %in% exceptions]
+  for(i in seq_len(dim(rules_)[1])){
+    if(grepl(rules_[i,"Pattern"], word, perl = TRUE)){
+      word_to_print <- gsub(rules_[i,"Pattern"],paste0("<strong>",rules_[i,"Replacement"],"</strong>"), word,perl=TRUE)
       word <- gsub("</strong>","",gsub("<strong>","",word_to_print))
-      kirsh = paste(
+      kirshenbaum = paste(
         ipa2kirsh[
           as.data.table(
             strsplit(
@@ -131,15 +120,15 @@ latin_to_french2 <- function(word, rules = rules, exceptions = character(0), ipa
         collapse = "")
       dt_ans <- rbind(
         dt_ans,
-        data.table(rule_id = rules[i]$rule_id, date = rules[i]$Date,
-                   explanation = rules[i]$Explanation, word = word,
-                   word_to_print = word_to_print, kirsh = kirsh)
+        data.table(rule_id = rules_[i]$rule_id, date = rules_[i]$Date,
+                   explanation = rules_[i]$Explanation, word = word,
+                   word_to_print = word_to_print, kirshenbaum = kirshenbaum)
       )
   }}
   dt_ans
   
 }
-pretty_print <- function(dt){
+pretty_print <- function(dt, row_highlight=0){
   dt[, century:=fcase(
     is.infinite(date), "Preliminaries",
     date < 100, "1st century AD",
@@ -164,18 +153,30 @@ pretty_print <- function(dt){
   dt2[,note:=
         fifelse(century %chin% c("9th century AD","10th century AD"), "orthograph fixation", "")]
   dt2 <- dt2[!(period=="Preliminaries" & explanation=="")]
+  
+  dt2 = rbind(
+    dt2[period == "Preliminaries"],
+    data.table(century="Starting from : ",
+               period = "Preliminaries",
+               explanation = "",
+               word_to_print = tail(dt2[period == "Preliminaries"]$word_to_print,1),
+               rule_id = "", note = ""),
+    dt2[period != "Preliminaries"])
+  
   index_prelim <- which(dt2$period == "Preliminaries")
   index_common <- which(dt2$period == "Common Romance Transformation")
   index_french <- which(dt2$period == "French transformations")
-  dt2[c(max(index_prelim), index_common, index_french), sound:=
-  # "<button type='button'><img
-  # src='https://upload.wikimedia.org/wikipedia/commons/4/47/Sound-icon.svg'
-  # height='30'
-  # width='30' /></button>"
-    as.character(shiny::actionButton("ee", "act"))
-  ]
-  dt2[is.na(sound), sound:=""]
-  res <- kbl(dt2[,!"period"], format.args=list(na.encode=TRUE), escape = FALSE) 
+  # dt2[c(ifelse(length(index_prelim)==0,integer(0),max(index_prelim)), index_common, index_french), sound:=
+  # # "<button type='button'><img
+  # # src='https://upload.wikimedia.org/wikipedia/commons/4/47/Sound-icon.svg'
+  # # height='30'
+  # # width='30' /></button>"
+  #   as.character(shiny::actionButton("ee", "act"))
+  # ]
+  # dt2[is.na(sound), sound:=""]
+  res <- kbl(
+      dt2[,!"period"],
+    format.args=list(na.encode=TRUE), escape = FALSE) 
   if(length(index_prelim)>0){
     res <- res %>% pack_rows(
       group_label = "Preliminaries",
@@ -198,13 +199,21 @@ pretty_print <- function(dt){
       end_row = max(index_french),
       background = "skyblue") %>%
     row_spec(row = index_french, background = "skyblue")}
-     
+    
+    if(row_highlight!=0){
+      res <- res %>% row_spec(
+        row=c(
+          which(dt2$century=="Starting from"),
+          which(dt2$period!="Preliminaries" & dt2$word!=""))[row_highlight],
+       background = "lightgreen",
+        bold = TRUE)
+    }
     res %>% column_spec(which(names(dt2)=="note")-1, bold = TRUE) %>%
       # cell_spec(c(3,2), format= "html")%>%
     kable_styling()
-
+}
   
-  }
+
 
 
 shinyApp(
@@ -242,7 +251,15 @@ shinyApp(
             htmlOutput("meaning")
           ), 
           fluidRow(
-            selectInput("exceptions", "Exceptions : enter the rule ids you want to skip", choices = 1:nrow(rules), multiple = TRUE)
+            column(
+              6,
+              selectInput(
+                "exceptions",
+                "Exceptions : enter the rule ids you want to skip",
+                choices = 1:nrow(rules),
+                multiple = TRUE)
+            ),
+            column(6, actionButton(inputId="play", label = "Play"))
           ),
           fluidRow(
             column(10,
@@ -320,29 +337,35 @@ shinyApp(
       #   if(input$choice != "Examples"){
       #     dico[entries==input$auto2][[1]]$senses}
       #     })
-    output$transfo <- function() {
+    table <- reactive({
       req(input$choice)
       if(input$choice == "Examples"){
         req(input$examples)
-        pretty_print(
           latin_to_french2(
             input$examples,
             rules = rules,
             exceptions = input$exceptions
-            )
-        )
+          )
+        
       } else {
         req(input$auto2)
-        pretty_print(
           latin_to_french2(
             input$auto2,
             rules = rules,
             exceptions = input$exceptions
-            )
-        )
+          )
       }
-    }
-    
+    })
+    row_to_play = reactiveVal(0)
+    observeEvent(input$play,{
+      row_to_play(row_to_play()+1) # increment x by 1
+    })
+
+    output$transfo <- function() {
+      req(table())
+      req(row_to_play())
+      pretty_print(table(), row_highlight = row_to_play())}
+
     dq_render_handsontable(
       "all_rules",
       rules[
