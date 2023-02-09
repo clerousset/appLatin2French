@@ -81,7 +81,7 @@ list_example <-
 dico <-readRDS("dico.Rds")
 entries_for_search<-lapply(dico, function(x)x$entry_for_search)
 entries<-lapply(dico, function(x)x$entry)
-rules<-data.table::fread("rules2.csv")
+rules<-data.table::fread("rulesStress.csv")
 rules[,rule_id := 1:.N]
 latin_to_french <- function(word, rules = rules2){
   word <- tolower(word)
@@ -167,14 +167,13 @@ pretty_print <- function(dt, row_highlight=0, sound = TRUE){
   index_common <- which(dt2$period == "Common Romance Transformation")
   index_french <- which(dt2$period == "French transformations")
   if(sound){
-    dt2[c(
-      ifelse(length(index_prelim)==0,integer(0),max(index_prelim)),
-      index_common,
-      index_french) & word_to_print!="", sound:=
+    dt2[(period!="Preliminaries" | century == "Starting from :") & word_to_print!="", sound:=
           paste0(
-            "<a onclick='this.firstChild.play()'>
-            <audio src='Effect.mp3'>
-            </audio>▸</a>")]
+            "
+            <audio 
+            controls
+            src='sound", rowid(period),".wav'>
+            </audio>")]
     
     dt2[is.na(sound), sound:=""]
   }
@@ -218,7 +217,14 @@ pretty_print <- function(dt, row_highlight=0, sound = TRUE){
     kable_styling()
 }
   
-
+create_sounds <- function(dt){
+  liste_pho <- c(
+    tail(dt[is.infinite(date)]$kirshenbaum,1),
+    dt[!is.infinite(date)]$kirshenbaum)
+  for(k in seq_along(liste_pho)){
+    system(paste0("espeak -w www/sound",k,".wav [[",liste_pho[k],"]]"))
+  }
+}
 
 
 shinyApp(
@@ -370,9 +376,9 @@ shinyApp(
       req(table())
       #req(input$sound)
      # req(row_to_play())
-      # if(input$sound){
-      #   #create_sounds()    save mp3 to wwww/
-      # }
+      if(input$sound){
+         create_sounds(table())
+       }
       pretty_print(table(), 
                    #row_highlight = row_to_play(),
                    sound = input$sound)}
