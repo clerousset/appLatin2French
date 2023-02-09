@@ -128,7 +128,7 @@ latin_to_french2 <- function(word, rules_ = rules, exceptions = character(0), ip
   dt_ans
   
 }
-pretty_print <- function(dt, row_highlight=0){
+pretty_print <- function(dt, row_highlight=0, sound = TRUE){
   dt[, century:=fcase(
     is.infinite(date), "Preliminaries",
     date < 100, "1st century AD",
@@ -166,14 +166,19 @@ pretty_print <- function(dt, row_highlight=0){
   index_prelim <- which(dt2$period == "Preliminaries")
   index_common <- which(dt2$period == "Common Romance Transformation")
   index_french <- which(dt2$period == "French transformations")
-  # dt2[c(ifelse(length(index_prelim)==0,integer(0),max(index_prelim)), index_common, index_french), sound:=
-  # # "<button type='button'><img
-  # # src='https://upload.wikimedia.org/wikipedia/commons/4/47/Sound-icon.svg'
-  # # height='30'
-  # # width='30' /></button>"
-  #   as.character(shiny::actionButton("ee", "act"))
-  # ]
-  # dt2[is.na(sound), sound:=""]
+  if(sound){
+    dt2[c(
+      ifelse(length(index_prelim)==0,integer(0),max(index_prelim)),
+      index_common,
+      index_french) & word_to_print!="", sound:=
+          paste0(
+            "<a onclick='this.firstChild.play()'>
+            <audio src='Effect.mp3'>
+            </audio>▸</a>")]
+    
+    dt2[is.na(sound), sound:=""]
+  }
+  
   res <- kbl(
       dt2[,!"period"],
     format.args=list(na.encode=TRUE), escape = FALSE) 
@@ -259,7 +264,7 @@ shinyApp(
                 choices = 1:nrow(rules),
                 multiple = TRUE)
             ),
-            column(6, actionButton(inputId="play", label = "Play"))
+            column(6, checkboxInput("sound", "Add sound", value=TRUE))
           ),
           fluidRow(
             column(10,
@@ -356,15 +361,21 @@ shinyApp(
           )
       }
     })
-    row_to_play = reactiveVal(0)
-    observeEvent(input$play,{
-      row_to_play(row_to_play()+1) # increment x by 1
-    })
+    # row_to_play = reactiveVal(0)
+    # observeEvent(input$play,{
+    #   row_to_play(row_to_play()+1) # increment x by 1
+    # })
 
     output$transfo <- function() {
       req(table())
-      req(row_to_play())
-      pretty_print(table(), row_highlight = row_to_play())}
+      #req(input$sound)
+     # req(row_to_play())
+      # if(input$sound){
+      #   #create_sounds()    save mp3 to wwww/
+      # }
+      pretty_print(table(), 
+                   #row_highlight = row_to_play(),
+                   sound = input$sound)}
 
     dq_render_handsontable(
       "all_rules",
