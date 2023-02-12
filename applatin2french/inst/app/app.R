@@ -131,7 +131,7 @@ latin_to_french2 <- function(word, rules_ = rules, exceptions = character(0), ip
 pretty_print <- function(dt, row_highlight=0, sound = TRUE){
   dt[, century:=fcase(
     is.infinite(date), "Preliminaries",
-    date < 0, "1st century BC"
+    date < 0, "1st century BC",
     date < 100, "1st century AD",
     date < 200, "2nd century AD",
     date < 300, "3rd century AD",
