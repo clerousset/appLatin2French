@@ -14,6 +14,8 @@ ipa2kirsh <-
     kirshenbaum = c("E","O","'","@","~","B","Q","D","T","Z","S","Y","W","j<rnd>",
                     "L","<w>","R","C","N")
   )
+ipa2kirsh[kirshenbaum!=make.names(kirshenbaum), for_filename := as.character(1:.N)]
+ipa2kirsh[is.na(for_filename), for_filename := kirshenbaum]
 
 list_example <- 
   data.table(latin = c(
@@ -107,8 +109,8 @@ latin_to_french2 <- function(word, rules_ = rules, exceptions = character(0), ip
     if(grepl(rules_[i,"Pattern"], word, perl = TRUE)){
       word_to_print <- gsub(rules_[i,"Pattern"],paste0("<strong>",rules_[i,"Replacement"],"</strong>"), word,perl=TRUE)
       word <- gsub("</strong>","",gsub("<strong>","",word_to_print))
-      kirshenbaum = paste(
-        ipa2kirsh[
+      
+      base <-   ipa2kirsh[
           as.data.table(
             strsplit(
               word,
@@ -116,13 +118,17 @@ latin_to_french2 <- function(word, rules_ = rules, exceptions = character(0), ip
           ),
           on=.(ipa=V1)][
             is.na(kirshenbaum),
-            kirshenbaum:=ipa]$kirshenbaum,
-        collapse = "")
-      dt_ans <- rbind(
+            `:=`(kirshenbaum=ipa, for_filename=ipa)]
+  
+kirshenbaum = paste(base$kirshenbaum, collapse="")
+for_filename = paste(base$for_filename, collapse="")      
+
+dt_ans <- rbind(
         dt_ans,
         data.table(rule_id = rules_[i]$rule_id, date = rules_[i]$Date,
                    explanation = rules_[i]$Explanation, word = word,
-                   word_to_print = word_to_print, kirshenbaum = kirshenbaum)
+                   word_to_print = word_to_print, kirshenbaum = kirshenbaum,
+                   for_filename = for_filename)
       )
   }}
   dt_ans
@@ -148,11 +154,16 @@ pretty_print <- function(dt, row_highlight=0, sound = TRUE){
     "Common Romance Transformation",
     default = "French transformations")]
   
-  dt2 <- dt[,.(period, century, explanation, word_to_print, rule_id=as.character(rule_id))][,n:=seq_len(.N),century][n!=1, century:=""][,n:=NULL]
-  dt2[is.na(explanation), explanation:=""][is.na(word_to_print), word_to_print:=""][is.na(rule_id),rule_id:=""]
+  dt2 <- dt[
+    ,.(period, century, explanation, word_to_print, for_filename,
+       rule_id=as.character(rule_id))][,n:=seq_len(.N),century][
+         n!=1, century:=""][,n:=NULL]
+  dt2[is.na(explanation), explanation:=""][
+    is.na(word_to_print), word_to_print:=""][is.na(rule_id),rule_id:=""]
   dt2[century == "Preliminaries", century:=""]
   dt2[,note:=
-        fifelse(century %chin% c("9th century AD","10th century AD"), "orthograph fixation", "")]
+        fifelse(century %chin% c("9th century AD","10th century AD"),
+                "orthograph fixation", "")]
   dt2 <- dt2[!(period=="Preliminaries" & explanation=="")]
   
   dt2 = rbind(
@@ -161,7 +172,8 @@ pretty_print <- function(dt, row_highlight=0, sound = TRUE){
                period = "Preliminaries",
                explanation = "",
                word_to_print = tail(dt2[period == "Preliminaries"]$word_to_print,1),
-               rule_id = "", note = ""),
+               rule_id = "", note = "",
+               for_filename= tail(dt2[period == "Preliminaries"]$for_filename,1)),
     dt2[period != "Preliminaries"])
   
   index_prelim <- which(dt2$period == "Preliminaries")
@@ -173,14 +185,14 @@ pretty_print <- function(dt, row_highlight=0, sound = TRUE){
             "
             <audio 
             controls
-            src='sound", rowid(period),".wav'>
+            src='sound", for_filename,".wav'>
             </audio>")]
     
     dt2[is.na(sound), sound:=""]
   }
   
   res <- kbl(
-      dt2[,!"period"],
+      dt2[,!c("period","for_filename")],
     format.args=list(na.encode=TRUE), escape = FALSE) 
   if(length(index_prelim)>0){
     res <- res %>% pack_rows(
@@ -219,11 +231,12 @@ pretty_print <- function(dt, row_highlight=0, sound = TRUE){
 }
   
 create_sounds <- function(dt){
-  liste_pho <- c(
-    tail(dt[is.infinite(date)]$kirshenbaum,1),
-    dt[!is.infinite(date)]$kirshenbaum)
-  for(k in seq_along(liste_pho)){
-    system(paste0("espeak -w www/sound",k,".wav [[",liste_pho[k],"]]"))
+ if(!dir.exists("www")){dir.create("www")}
+  liste_pho <- rbind(
+    tail(dt[is.infinite(date)],1),
+    dt[!is.infinite(date)])[,.(kirshenbaum, for_filename)]
+  for(k in seq_len(nrow(liste_pho))){
+    system(paste0("espeak -w www/sound",liste_pho[k]$for_filename,".wav -v mb-fr1 \"[[",liste_pho[k]$kirshenbaum,"]]\""))
   }
 }
 
