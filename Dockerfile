@@ -10,7 +10,7 @@ RUN apt-get update -y && \
                                                libgdal-dev \
                                                espeak
 RUN sudo mkdir usr/share/mbrola
-RUN sudo wget https://github.com/numediart/MBROLA-voices/blob/master/data/fr1/fr1?raw=true -O usr/share/mbrola
+RUN sudo wget https://github.com/numediart/MBROLA-voices/blob/master/data/fr1/fr1?raw=true -O usr/share/mbrola/fr1
                                            
 
 # Install R package and its dependencies
