@@ -17,36 +17,36 @@ ipa2kirsh <-
 
 list_example <- 
   data.table(latin = c(
-  "b\u0115\u0301ll\u014ds",#ok
-  "b\u0115\u0301n\u0115",
-  "b\u014f\u0301v\u0115",
-  "c\u0101\u0301m\u0115ra",
-  "cant\u0101\u0301t\u016D",
-  "c\u0101\u0301p\u016D",
-  "c\u0101\u0301r\u016D",
-  "c\u014f\u0301m\u012dte",
-  "c\u014f\u0301mp\u016Dtat",
-  "fa\u0301ct\u016D",
-  "f\u012d\u0301de",
-  "f\u012b\u0301l\u012d\u016Ds",
-  "f\u014f\u0301l\u012d\u0103",
-  "h\u014f\u0301sp\u012dte",
-  "l\u0115\u0301ct\u016D",
-  "ma\u0301los",
-  "mat\u016B\u0301r\u016D",
-  "merc\u0113\u0301de",
-  "nau\u0301s\u0115a",
-  "n\u0115p\u014d\u0301te",
-  "n\u016B\u0301d\u016D",
-  "p\u0115\u0301de",
-  "pla\u0301n\u016D",
-  "p\u014f\u0301tet",
-  "pr\u0103\u0301t\u016D",
-  "p\u016D\u0301gn\u016D",#ok
-  "t\u0113\u0301ct\u016D",#ok
-  "t\u0115\u0301n\u0115r\u016D",#ok
-  "v\u012b\u0301ta",
-  "v\u012d\u0301nc\u0115re"),
+  "b\u0115ll\u014ds",#ok
+  "b\u0115n\u0115",
+  "b\u014fv\u0115",
+  "c\u0101m\u0115ra",
+  "cant\u0101t\u016D",
+  "c\u0101p\u016D",
+  "c\u0101r\u016D",
+  "c\u014fm\u012dte",
+  "c\u014fmp\u016Dtat",
+  "fact\u016D",
+  "f\u012dde",
+  "f\u012bl\u012d\u016Ds",
+  "f\u014fl\u012d\u0103",
+  "h\u014fsp\u012dte",
+  "l\u0115ct\u016D",
+  "malos",
+  "mat\u016Br\u016D",
+  "merc\u0113de",
+  "naus\u0115a",
+  "n\u0115p\u014dte",
+  "n\u016Bd\u016D",
+  "p\u0115de",
+  "plan\u016D",
+  "p\u014ftet",
+  "pr\u0103t\u016D",
+  "p\u016Dgn\u016D",#ok
+  "t\u0113ct\u016D",#ok
+  "t\u0115n\u0115r\u016D",#ok
+  "v\u012bta",
+  "v\u012dnc\u0115re"),
   french = c(
     "beau [bo] (en : beautiful)",
     "bien [bjɛ\u0303] (en : good)",
@@ -299,7 +299,7 @@ shinyApp(
             selectInput(
               inputId = "examples",
               label = "Examples",
-              selected = "c\u0101\u0301m\u0115ra",
+              selected = "c\u0101m\u0115ra",
               choices = list_example$latin)
           )
         } else {
