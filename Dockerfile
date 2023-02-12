@@ -8,7 +8,10 @@ RUN apt-get update -y && \
                                                libxml2-dev \
                                                gdal-bin \
                                                libgdal-dev \
-                                               espeak
+                                               espeak \
+    sudo mkdir usr/share/mbrola \
+    sudo wget https://github.com/numediart/MBROLA-voices/blob/master/data/fr1/fr1?raw=true -O usr/share/mbrola
+                                           
 
 # Install R package and its dependencies
 RUN install2.r remotes

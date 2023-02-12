@@ -131,19 +131,20 @@ latin_to_french2 <- function(word, rules_ = rules, exceptions = character(0), ip
 pretty_print <- function(dt, row_highlight=0, sound = TRUE){
   dt[, century:=fcase(
     is.infinite(date), "Preliminaries",
+    date < 0, "1st century BC"
     date < 100, "1st century AD",
     date < 200, "2nd century AD",
     date < 300, "3rd century AD",
     date>=300, paste0(floor(date/100)+1,"th century AD")
   )]
   
-  dt <- dt[data.table(century = c("Preliminaries","1st century AD",
+  dt <- dt[data.table(century = c("Preliminaries","1st century BC","1st century AD",
                                   "2nd century AD","3rd century AD",
                                   paste0(4:18, "th century AD"))),on =.(century)]
   
   dt[,period:=fcase(
     century == "Preliminaries", "Preliminaries",
-    century %chin% c("1st century AD","2nd century AD","3rd century AD"),
+    century %chin% c("1st century BC","1st century AD","2nd century AD","3rd century AD"),
     "Common Romance Transformation",
     default = "French transformations")]
   
