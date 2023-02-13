@@ -8,7 +8,8 @@ RUN apt-get update -y && \
                                                libxml2-dev \
                                                gdal-bin \
                                                libgdal-dev \
-                                               espeak
+                                               espeak \
+                                               mbrola
 RUN sudo mkdir /usr/share/mbrola
 RUN sudo wget https://github.com/numediart/MBROLA-voices/blob/master/data/fr1/fr1?raw=true -O /usr/share/mbrola/fr1
                                            
