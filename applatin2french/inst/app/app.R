@@ -120,7 +120,7 @@ latin_to_french2 <- function(word, rules_ = rules, exceptions = character(0), ip
             is.na(kirshenbaum),
             `:=`(kirshenbaum=ipa, for_filename=ipa)]
   
-kirshenbaum = gsub("o~","O~",gsub("a~","A~",paste(base$kirshenbaum, collapse="")))
+kirshenbaum = paste(base$kirshenbaum, collapse="")
 for_filename = paste(base$for_filename, collapse="")      
 
 dt_ans <- rbind(
