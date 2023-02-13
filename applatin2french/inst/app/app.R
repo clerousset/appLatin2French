@@ -1,7 +1,7 @@
-# devtools::install_github("gadenbuie/shinyThings")
-# remotes::install_github("daqana/dqshiny")
-# install.packages("rhandsontable")
-# install.packages("kableExtra")
+# devtools::install_github("gadenbuie/shinyThings", upgrade = "never")
+# remotes::install_github("daqana/dqshiny", upgrade = "never")
+# install.packages("rhandsontable", upgrade = "never")
+# install.packages("kableExtra", upgrade = "never")
 library(kableExtra)
 library(shiny)
 library(dqshiny)
@@ -10,9 +10,9 @@ ipa2kirsh <-
   data.table(
     ipa = c("\u025b","\u0254","\u02C8","\u0259","\u0303","\u03b2","\u03b3",
             "\u03b4","\u03b8","\u0292","\u0283","\u00f8","\u0153","\u0265",
-            "\u026b","\u02b7","\u0280","\u00e7","\u014b"),
+            "\u026b","\u02b7","\u0280","\u00e7","\u014b","\u032c", "\u02D0"),
     kirshenbaum = c("E","O","'","@","~","B","Q","D","T","Z","S","Y","W","j<rnd>",
-                    "L","<w>","R","C","N")
+                    "L","<w>","R","C","N",";",":")
   )
 ipa2kirsh[kirshenbaum!=make.names(kirshenbaum), for_filename := as.character(1:.N)]
 ipa2kirsh[is.na(for_filename), for_filename := kirshenbaum]
@@ -180,12 +180,12 @@ pretty_print <- function(dt, row_highlight=0, sound = TRUE){
   index_common <- which(dt2$period == "Common Romance Transformation")
   index_french <- which(dt2$period == "French transformations")
   if(sound){
-    dt2[(period!="Preliminaries" | century == "Starting from :") & word_to_print!="", sound:=
+    dt2[(period!="Preliminaries" | century == "Starting from : ") & word_to_print!="", sound:=
           paste0(
             "
             <audio 
             controls
-            src='sound", for_filename,".wav'>
+            src='", for_filename,".wav'>
             </audio>")]
     
     dt2[is.na(sound), sound:=""]
@@ -225,9 +225,9 @@ pretty_print <- function(dt, row_highlight=0, sound = TRUE){
        background = "lightgreen",
         bold = TRUE)
     }
-    res %>% column_spec(which(names(dt2)=="note")-1, bold = TRUE) %>%
+    #res %>% column_spec(which(names(dt2)=="note")-1, bold = TRUE) %>%
       # cell_spec(c(3,2), format= "html")%>%
-    kable_styling()
+    res %>% kable_styling()
 }
   
 create_sounds <- function(dt){
@@ -236,7 +236,7 @@ create_sounds <- function(dt){
     tail(dt[is.infinite(date)],1),
     dt[!is.infinite(date)])[,.(kirshenbaum, for_filename)]
   for(k in seq_len(nrow(liste_pho))){
-    system(paste0("espeak -w www/sound",liste_pho[k]$for_filename,".wav -v mb-fr1 \"[[",liste_pho[k]$kirshenbaum,"]]\""))
+    system(paste0("espeak -w www/",liste_pho[k]$for_filename,".wav -vfr \"[[",liste_pho[k]$kirshenbaum,"]]\""))
   }
 }
 
@@ -283,8 +283,8 @@ shinyApp(
                 "Exceptions : enter the rule ids you want to skip",
                 choices = 1:nrow(rules),
                 multiple = TRUE)
-            ),
-            column(6, checkboxInput("sound", "Add sound", value=TRUE))
+            )#,
+            #column(6, checkboxInput("sound", "Add sound", value=TRUE))
           ),
           fluidRow(
             column(10,
@@ -390,12 +390,12 @@ shinyApp(
       req(table())
       #req(input$sound)
      # req(row_to_play())
-      if(input$sound){
-         create_sounds(table())
-       }
+     # if(input$sound){
+      create_sounds(table())
+      # }
       pretty_print(table(), 
                    #row_highlight = row_to_play(),
-                   sound = input$sound)}
+                   sound = TRUE)}
 
     dq_render_handsontable(
       "all_rules",
