@@ -120,7 +120,7 @@ latin_to_french2 <- function(word, rules_ = rules, exceptions = character(0), ip
             is.na(kirshenbaum),
             `:=`(kirshenbaum=ipa, for_filename=ipa)]
   
-kirshenbaum = paste(base$kirshenbaum, collapse="")
+kirshenbaum = gsub("o~","O~",gsub("a~","A~",paste(base$kirshenbaum, collapse="")))
 for_filename = paste(base$for_filename, collapse="")      
 
 dt_ans <- rbind(
@@ -236,7 +236,7 @@ create_sounds <- function(dt){
     tail(dt[is.infinite(date)],1),
     dt[!is.infinite(date)])[,.(kirshenbaum, for_filename)]
   for(k in seq_len(nrow(liste_pho))){
-    system(paste0("espeak -w www/",liste_pho[k]$for_filename,".wav -vfr \"[[",liste_pho[k]$kirshenbaum,"]]\""))
+    system(paste0("espeak -w www/",liste_pho[k]$for_filename,".wav -v mb-fr1 \"[[",liste_pho[k]$kirshenbaum,"]]\""))
   }
 }
 
