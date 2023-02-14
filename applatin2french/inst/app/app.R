@@ -6,239 +6,130 @@ library(kableExtra)
 library(shiny)
 library(dqshiny)
 library(data.table)
+library(applatin2french)
 ipa2kirsh <-
   data.table(
     ipa = c("\u025b","\u0254","\u02C8","\u0259","\u0303","\u03b2","\u03b3",
             "\u03b4","\u03b8","\u0292","\u0283","\u00f8","\u0153","\u0265",
-            "\u026b","\u02b7","\u0280","\u00e7","\u014b","\u032c", "\u02D0"),
+            "\u026b","\u02b7","\u0280","\u00e7","\u014b","\u032c", "\u02D0",
+            "\u0251"),
     kirshenbaum = c("E","O","'","@","~","B","Q","D","T","Z","S","Y","W","j<rnd>",
-                    "L","<w>","R","C","N",";",":")
+                    "L","<w>","R","C","N",";",":","A")
   )
 ipa2kirsh[kirshenbaum!=make.names(kirshenbaum), for_filename := as.character(1:.N)]
 ipa2kirsh[is.na(for_filename), for_filename := kirshenbaum]
 
-list_example <- 
+list_example <-
   data.table(latin = c(
-  "b\u0115ll\u014ds",#ok
-  "b\u0115n\u0115",
-  "b\u014fv\u0115",
-  "c\u0101m\u0115ra",
-  "cant\u0101t\u016D",
-  "c\u0101p\u016D",
-  "c\u0101r\u016D",
-  "c\u014fm\u012dte",
-  "c\u014fmp\u016Dtat",
-  "fact\u016D",
-  "f\u012dde",
-  "f\u012bl\u012d\u016Ds",
-  "f\u014fl\u012d\u0103",
-  "h\u014fsp\u012dte",
-  "l\u0115ct\u016D",
-  "malos",
-  "mat\u016Br\u016D",
-  "merc\u0113de",
-  "naus\u0115a",
-  "n\u0115p\u014dte",
-  "n\u016Bd\u016D",
-  "p\u0115de",
-  "plan\u016D",
-  "p\u014ftet",
-  "pr\u0103t\u016D",
-  "p\u016Dgn\u016D",#ok
-  "t\u0113ct\u016D",#ok
-  "t\u0115n\u0115r\u016D",#ok
-  "v\u012bta",
-  "v\u012dnc\u0115re"),
-  french = c(
-    "beau [bo] (en : beautiful)",
-    "bien [bjɛ\u0303] (en : good)",
-    "boeuf [b\u00f8] (en : ox)",
-    "chambre [\u0283a\u0303b\u0280] (en : room)",
-    "chanté [\u0283a\u0303te] (en : sung)",
-    "chef [\u0283\u025bf] (en : chief)",
-    "cher [\u0283\u025b\u0280] (en : expensive, dear)",
-    "compte [] (en :  ",
-    "conte",
-    "fait",
-    "foi [fwa] (en : faith)","","",
-    "hôte [ot] (en : host)",
-    "lit [li] (en : bed)",
-    "",
-    "mûr [my\u0280] (en : mature)",
-    "merci [m\u025b\u0280si] (en : thanks)",
-    "noise [nwaz] (en : quarrel)",
-    "neveu [n\u0259v\u00f8] (en : nephew)",
-    "nu [ny] (en : nude)",
-    "pied [pje] (en : foot)",
-    "plein [pl\u025b\u0303] (en : full)",
-    "peut [p\u00f8] (en : (he) can)",
-    "pré [p\u0280e] (en : meadow)",
-    "poing [pw\u025b\u0303] (en : fist)",
-    "toit [twa] (en : roof)",
-    "tendre [ta\u0303d\u0280] (en : tender)",
-    "vie [vi] (en : life)",
-    "vaincre [v\u025b\u0303k\u0280] (en : overcome)"
+    "b\u0115ll\u014ds",#ok
+    "b\u0115n\u0115",
+    "b\u014fv\u0115",
+    "c\u0101m\u0115ra",
+    "cant\u0101t\u016D",
+    "c\u0101p\u016D",
+    "c\u0101r\u016D",
+    "c\u014fm\u012dte",
+    "c\u014fmp\u016Dtat",
+    "fact\u016D",
+    "f\u012dde",
+    "f\u012bl\u012d\u016Ds",
+    "f\u014fl\u012d\u0103",
+    "h\u014fsp\u012dte",
+    "l\u0115ct\u016D",
+    "malos",
+    "mat\u016Br\u016D",
+    "merc\u0113de",
+    "naus\u0115a",
+    "n\u0115p\u014dte",
+    "n\u016Bd\u016D",
+    "p\u0115de",
+    "plan\u016D",
+    "p\u014ftet",
+    "pr\u0103t\u016D",
+    "p\u016Dgn\u016D",#ok
+    "t\u0113ct\u016D",#ok
+    "t\u0115n\u0115r\u016D",#ok
+    "v\u012bta",
+    "v\u012dnc\u0115re"),
+    expected_kirshenbaum = c(
+      "b'o",
+      "bj'E~",
+      "b'Y",
+      "S'A~bR",
+      "SA~t'e",
+      "S'Ef",
+      "S'ER",
+      "k'O~t",
+      "k'O~t",
+      "f'E",
+      "fw'a",
+      "f'is",
+      "f'Wj",
+      "'ot",
+      "l'i",
+      "m'o",
+      "m'yR",
+      "mERS'i",
+      "nw'az",
+      "n@v'Y",
+      "n'y",
+      "pj'e",
+      "pl'E~",
+      "p'Y",
+      "pR'e",
+      "pw'E~",
+      "tw'a",
+      "t'A~dR",
+      "v'i",
+      "v'E~kR"
+    ),
+    french = c(
+      "beau [bo] (en : beautiful)",
+      "bien [bjɛ\u0303] (en : good)",
+      "boeuf [b\u00f8] (en : ox)",
+      "chambre [\u0283a\u0303b\u0280] (en : room)",
+      "chanté [\u0283a\u0303te] (en : sung)",
+      "chef [\u0283\u025bf] (en : chief)",
+      "cher [\u0283\u025b\u0280] (en : expensive, dear)",
+      "comte [k\u0254\u0303] (en : county)",
+      "compte [k\u0254\u0303] (en : account)",
+      "fait [f\u025bt] (en : fact)",
+      "foi [fwa] (en : faith)",
+      "fils [fis] (en : son)",
+      "feuille [f\u0153y] (en : leaf)",
+      "hôte [ot] (en : host)",
+      "lit [li] (en : bed)",
+      "maux [mo] (en : evil)",
+      "mûr [my\u0280] (en : mature)",
+      "merci [m\u025b\u0280si] (en : thanks)",
+      "noise [nwaz] (en : quarrel)",
+      "neveu [n\u0259v\u00f8] (en : nephew)",
+      "nu [ny] (en : nude)",
+      "pied [pje] (en : foot)",
+      "plein [pl\u025b\u0303] (en : full)",
+      "peut [p\u00f8] (en : (he) can)",
+      "pré [p\u0280e] (en : meadow)",
+      "poing [pw\u025b\u0303] (en : fist)",
+      "toit [twa] (en : roof)",
+      "tendre [ta\u0303d\u0280] (en : tender)",
+      "vie [vi] (en : life)",
+      "vaincre [v\u025b\u0303k\u0280] (en : overcome)"
     ))
+
 
 dico <-readRDS("dico.Rds")
 entries_for_search<-lapply(dico, function(x)x$entry_for_search)
 entries<-lapply(dico, function(x)x$entry)
 rules<-data.table::fread("rulesStress.csv")
 rules[,rule_id := 1:.N]
-latin_to_french <- function(word, rules = rules2){
-  word <- tolower(word)
-  ans <-  paste0("Starting from ", word)
-  for(i in seq_len(dim(rules)[1])){
-    if(grepl(rules[i,"Pattern"], word,perl=TRUE)){
-      word <- gsub(rules[i,"Pattern"],rules[i,"Replacement"], word,perl=TRUE)
-      ans <-
-        paste0(
-          ans,
-          "\n rule n°",i ," :",ifelse(rules[i,"Date"]!=-Inf,paste0(" at ",rules[i,"Date"]),"") ," ", rules[i, "Explanation"] , " => " , word)
-    }
+rules[,rule_id:=0]
+latin_to_french2("vita", rules_ = rules)
+list_example$result_kirsh <- sapply(list_example$latin,
+       function(word){
+         tail(latin_to_french2(word, rules_ = rules)$kirshenbaum,1)})
 
-  }
-  ans
-}
-latin_to_french2 <- function(word, rules_ = rules, exceptions = character(0), ipa2kirsh_=ipa2kirsh){
-  word <- tolower(word)
-  dt_ans <- data.table()
-  #ans <-  paste0("Starting from ", word)
-  rules_ <- rules_[!rule_id %in% exceptions]
-  for(i in seq_len(dim(rules_)[1])){
-    if(grepl(rules_[i,"Pattern"], word, perl = TRUE)){
-      word_to_print <- gsub(rules_[i,"Pattern"],paste0("<strong>",rules_[i,"Replacement"],"</strong>"), word,perl=TRUE)
-      word <- gsub("</strong>","",gsub("<strong>","",word_to_print))
-      
-      base <-   ipa2kirsh[
-          as.data.table(
-            strsplit(
-              word,
-              split="")
-          ),
-          on=.(ipa=V1)][
-            is.na(kirshenbaum),
-            `:=`(kirshenbaum=ipa, for_filename=ipa)]
-  
-kirshenbaum = paste(base$kirshenbaum, collapse="")
-for_filename = paste(base$for_filename, collapse="")      
-
-dt_ans <- rbind(
-        dt_ans,
-        data.table(rule_id = rules_[i]$rule_id, date = rules_[i]$Date,
-                   explanation = rules_[i]$Explanation, word = word,
-                   word_to_print = word_to_print, kirshenbaum = kirshenbaum,
-                   for_filename = for_filename)
-      )
-  }}
-  dt_ans
-  
-}
-pretty_print <- function(dt, row_highlight=0, sound = TRUE){
-  dt[, century:=fcase(
-    is.infinite(date), "Preliminaries",
-    date < 0, "1st century BC",
-    date < 100, "1st century AD",
-    date < 200, "2nd century AD",
-    date < 300, "3rd century AD",
-    date>=300, paste0(floor(date/100)+1,"th century AD")
-  )]
-  
-  dt <- dt[data.table(century = c("Preliminaries","1st century BC","1st century AD",
-                                  "2nd century AD","3rd century AD",
-                                  paste0(4:18, "th century AD"))),on =.(century)]
-  
-  dt[,period:=fcase(
-    century == "Preliminaries", "Preliminaries",
-    century %chin% c("1st century BC","1st century AD","2nd century AD","3rd century AD"),
-    "Common Romance Transformation",
-    default = "French transformations")]
-  
-  dt2 <- dt[
-    ,.(period, century, explanation, word_to_print, for_filename,
-       rule_id=as.character(rule_id))][,n:=seq_len(.N),century][
-         n!=1, century:=""][,n:=NULL]
-  dt2[is.na(explanation), explanation:=""][
-    is.na(word_to_print), word_to_print:=""][is.na(rule_id),rule_id:=""]
-  dt2[century == "Preliminaries", century:=""]
-  dt2[,note:=
-        fifelse(century %chin% c("9th century AD","10th century AD"),
-                "orthograph fixation", "")]
-  dt2 <- dt2[!(period=="Preliminaries" & explanation=="")]
-  
-  dt2 = rbind(
-    dt2[period == "Preliminaries"],
-    data.table(century="Starting from : ",
-               period = "Preliminaries",
-               explanation = "",
-               word_to_print = tail(dt2[period == "Preliminaries"]$word_to_print,1),
-               rule_id = "", note = "",
-               for_filename= tail(dt2[period == "Preliminaries"]$for_filename,1)),
-    dt2[period != "Preliminaries"])
-  
-  index_prelim <- which(dt2$period == "Preliminaries")
-  index_common <- which(dt2$period == "Common Romance Transformation")
-  index_french <- which(dt2$period == "French transformations")
-  if(sound){
-    dt2[(period!="Preliminaries" | century == "Starting from : ") & word_to_print!="", sound:=
-          paste0(
-            "
-            <audio 
-            controls
-            src='", for_filename,".wav'>
-            </audio>")]
-    
-    dt2[is.na(sound), sound:=""]
-  }
-  
-  res <- kbl(
-      dt2[,!c("period","for_filename")],
-    format.args=list(na.encode=TRUE), escape = FALSE) 
-  if(length(index_prelim)>0){
-    res <- res %>% pack_rows(
-      group_label = "Preliminaries",
-      start_row = min(index_prelim),
-      end_row = max(index_prelim),
-      background = "plum") %>%
-    row_spec(row = index_prelim, background = "plum")}
-  if(length(index_common)>0){
-    res <- res %>% 
-    pack_rows(
-      group_label = "Common Romance Transformation",
-      start_row = min(index_common),
-      end_row = max(index_common),
-      background = "lightsalmon") %>%
-    row_spec(row = index_common, background = "lightsalmon")}
-  if(length(index_french)>0){
-    res <- res %>% pack_rows(
-      group_label = "French transformations",
-      start_row = min(index_french),
-      end_row = max(index_french),
-      background = "skyblue") %>%
-    row_spec(row = index_french, background = "skyblue")}
-    
-    if(row_highlight!=0){
-      res <- res %>% row_spec(
-        row=c(
-          which(dt2$century=="Starting from"),
-          which(dt2$period!="Preliminaries" & dt2$word!=""))[row_highlight],
-       background = "lightgreen",
-        bold = TRUE)
-    }
-    #res %>% column_spec(which(names(dt2)=="note")-1, bold = TRUE) %>%
-      # cell_spec(c(3,2), format= "html")%>%
-    res %>% kable_styling()
-}
-  
-create_sounds <- function(dt){
- if(!dir.exists("www")){dir.create("www")}
-  liste_pho <- rbind(
-    tail(dt[is.infinite(date)],1),
-    dt[!is.infinite(date)])[,.(kirshenbaum, for_filename)]
-  for(k in seq_len(nrow(liste_pho))){
-    system(paste0("espeak -w www/",liste_pho[k]$for_filename,".wav -v mb-fr1 \"[[",liste_pho[k]$kirshenbaum,"]]\""))
-  }
-}
+# ## keep only working examples for the moment
+list_example <- list_example[result_kirsh==expected_kirshenbaum]
 
 
 shinyApp(
@@ -254,11 +145,11 @@ shinyApp(
             #     </svg>", href="https://github.com/clerousset/applatin2french"),
            p("Pronounciation of Latin changed during time especially in
               today's French territory. General transformation rules have been dated  
-              by linguists. The one explained in the book have been coded using
-              regular expression github link. The examples of the book are presented
+              by linguists. The one explained in the book Précis de phonétique historique, Noëlle Laborderie, Armand Colin have been coded using
+              regular expression. The examples of the book are presented
              below. A Latin dictionary is also connected allowing to see the
              natural transformation of any Latin word. Some rules may be skipped with
-             the exception input")
+             the exception input. The code is there https://github.com/clerousset/applatin2french, for all remarks email clerousset@protonmail.com")
           
           ),
           fluidRow(
