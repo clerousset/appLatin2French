@@ -80,7 +80,7 @@ pretty_print <- function(dt, row_highlight=0, sound = TRUE){
   dt2[century == "Preliminaries", century:=""]
   dt2[,note:=
         fifelse(century %chin% c("9th century AD","10th century AD"),
-                "orthograph fixation", "")]
+                "spelling fixation", "")]
   dt2 <- dt2[!(period=="Preliminaries" & explanation=="")]
   
   dt2 = rbind(
@@ -116,23 +116,23 @@ pretty_print <- function(dt, row_highlight=0, sound = TRUE){
       group_label = "Preliminaries",
       start_row = min(index_prelim),
       end_row = max(index_prelim),
-      background = "plum") %>%
-      row_spec(row = index_prelim, background = "plum")}
+      background = "#f2cbf0") %>%
+      row_spec(row = index_prelim, background = "#f2cbf0")}
   if(length(index_common)>0){
     res <- res %>% 
       pack_rows(
         group_label = "Common Romance Transformation",
         start_row = min(index_common),
         end_row = max(index_common),
-        background = "lightsalmon") %>%
-      row_spec(row = index_common, background = "lightsalmon")}
+        background = "#f7f0bc") %>%
+      row_spec(row = index_common, background = "#f7f0bc")}
   if(length(index_french)>0){
     res <- res %>% pack_rows(
       group_label = "French transformations",
       start_row = min(index_french),
       end_row = max(index_french),
-      background = "skyblue") %>%
-      row_spec(row = index_french, background = "skyblue")}
+      background = "#c8eff7") %>%
+      row_spec(row = index_french, background = "#c8eff7")}
   
   if(row_highlight!=0){
     res <- res %>% row_spec(
