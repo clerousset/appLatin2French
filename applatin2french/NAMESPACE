@@ -3,4 +3,5 @@
 export(create_sounds)
 export(latin_to_french2)
 export(pretty_print)
+export(runApp)
 import(data.table)
