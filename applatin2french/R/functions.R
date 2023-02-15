@@ -1,4 +1,4 @@
-latin_to_french <- function(word, rules = rules2){
+latin_to_french <- function(word, rules){
   word <- tolower(word)
   ans <-  paste0("Starting from ", word)
   for(i in seq_len(dim(rules)[1])){
@@ -15,7 +15,7 @@ latin_to_french <- function(word, rules = rules2){
 }
 
 #' @export
-latin_to_french2 <- function(word, rules_ = rules, exceptions = character(0), ipa2kirsh_=ipa2kirsh){
+latin_to_french2 <- function(word, rules_, exceptions = character(0), ipa2kirsh_){
   word <- tolower(word)
   dt_ans <- data.table()
   #ans <-  paste0("Starting from ", word)
@@ -25,7 +25,7 @@ latin_to_french2 <- function(word, rules_ = rules, exceptions = character(0), ip
       word_to_print <- gsub(rules_[i,"Pattern"],paste0("<strong>",rules_[i,"Replacement"],"</strong>"), word,perl=TRUE)
       word <- gsub("</strong>","",gsub("<strong>","",word_to_print))
       
-      base <-   ipa2kirsh[
+      base <-   ipa2kirsh_[
         as.data.table(
           strsplit(
             word,

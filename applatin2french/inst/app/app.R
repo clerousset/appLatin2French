@@ -123,7 +123,8 @@ entries<-lapply(dico, function(x)x$entry)
 rules<-data.table::fread("rulesStress.csv")
 rules[,rule_id := 1:.N]
 rules[,rule_id:=0]
-list_example$result_kirsh <- sapply(list_example$latin,
+list_example$result_kirsh <- 
+  sapply(list_example$latin,
        function(word){
          tail(latin_to_french2(word, rules_ = rules, ipa2kirsh_ = ipa2kirsh)$kirshenbaum,1)})
 
