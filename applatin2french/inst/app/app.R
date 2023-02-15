@@ -258,7 +258,8 @@ shinyApp(
           latin_to_french2(
             input$examples,
             rules = rules,
-            exceptions = input$exceptions
+            exceptions = input$exceptions,
+            ipa2kirsh_ = ipa2kirsh
           )
         
       } else {
@@ -266,7 +267,8 @@ shinyApp(
           latin_to_french2(
             input$auto2,
             rules = rules,
-            exceptions = input$exceptions
+            exceptions = input$exceptions,
+            ipa2kirsh_ = ipa2kirsh
           )
       }
     })
