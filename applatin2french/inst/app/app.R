@@ -122,7 +122,6 @@ entries_for_search<-lapply(dico, function(x)x$entry_for_search)
 entries<-lapply(dico, function(x)x$entry)
 rules<-data.table::fread("rulesStress.csv")
 rules[,rule_id := 1:.N]
-rules[,rule_id:=0]
 list_example$result_kirsh <- 
   sapply(list_example$latin,
        function(word){
