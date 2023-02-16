@@ -12,6 +12,7 @@ RUN apt-get update -y && \
                                                mbrola
 RUN sudo mkdir /usr/share/mbrola
 RUN sudo wget https://github.com/numediart/MBROLA-voices/blob/master/data/fr1/fr1?raw=true -O /usr/share/mbrola/fr1
+RUN sudo wget https://github.com/numediart/MBROLA-voices/blob/master/data/in1/in1?raw=true -O /usr/share/mbrola/in1
                                            
 
 # Install R package and its dependencies
