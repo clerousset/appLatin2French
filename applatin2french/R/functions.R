@@ -154,6 +154,6 @@ create_sounds <- function(dt){
     tail(dt[is.infinite(date)],1),
     dt[!is.infinite(date)])[,.(kirshenbaum, for_filename)]
   for(k in seq_len(nrow(liste_pho))){
-    system(paste0("espeak -w www/",liste_pho[k]$for_filename,".wav -v mb-fr1 \"[[",liste_pho[k]$kirshenbaum,"]]\""))
+    system(paste0("espeak -w www/",liste_pho[k]$for_filename,".wav -v mb-",ifelse(grepl("e~",liste_pho[k]$kirshenbaum),"in1","fr1")," \"[[",liste_pho[k]$kirshenbaum,"]]\""))
   }
 }
